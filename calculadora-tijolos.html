@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Tijolos</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --brick: #C1440E;
+    --brick-dark: #8B2D08;
+    --brick-light: #E8622A;
+    --sand: #F5EFE6;
+    --earth: #6B4C35;
+    --text: #1A1008;
+    --text-soft: #5C4033;
+    --white: #FFFDF9;
+    --shadow: 0 4px 24px rgba(193,68,14,0.12);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--sand);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--brick-dark);
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 28px,
+        rgba(255,255,255,0.03) 28px,
+        rgba(255,255,255,0.03) 30px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 58px,
+        rgba(255,255,255,0.03) 58px,
+        rgba(255,255,255,0.03) 60px
+      );
+    padding: 60px 24px 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 48px;
+    background: var(--sand);
+    clip-path: ellipse(55% 100% at 50% 100%);
+  }
+
+  .hero-eyebrow {
+    display: inline-block;
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--brick-light);
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 6px 16px;
+    border-radius: 40px;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.05;
+    letter-spacing: -0.5px;
+  }
+
+  .hero h1 span {
+    color: var(--brick-light);
+  }
+
+  .hero p {
+    margin-top: 16px;
+    font-size: 16px;
+    color: rgba(255,255,255,0.65);
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+  }
+
+  /* ── CALCULADORA ── */
+  .calc-wrapper {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 48px 20px 80px;
+  }
+
+  .card {
+    background: var(--white);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .card-header {
+    background: linear-gradient(135deg, var(--brick) 0%, var(--brick-dark) 100%);
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .card-header-icon {
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+
+  .card-header h2 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--white);
+    letter-spacing: 0.3px;
+  }
+
+  .card-header p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.65);
+    margin-top: 2px;
+  }
+
+  .card-body {
+    padding: 32px;
+  }
+
+  /* ── GRID DE CAMPOS ── */
+  .fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 540px) {
+    .fields-grid { grid-template-columns: 1fr; }
+    .card-body { padding: 24px 20px; }
+  }
+
+  .field-full { grid-column: 1 / -1; }
+
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    margin-bottom: 8px;
+  }
+
+  .field input,
+  .field select {
+    width: 100%;
+    height: 50px;
+    padding: 0 16px;
+    border: 2px solid #E8DDD5;
+    border-radius: 10px;
+    background: var(--sand);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    transition: border-color .2s, box-shadow .2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B4C35' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+    cursor: pointer;
+  }
+
+  .field input:focus,
+  .field select:focus {
+    outline: none;
+    border-color: var(--brick);
+    box-shadow: 0 0 0 4px rgba(193,68,14,0.1);
+    background: var(--white);
+  }
+
+  /* ── OPENINGS (portas/janelas) ── */
+  .openings-section {
+    margin-top: 28px;
+    border-top: 1px dashed #E0D4C8;
+    padding-top: 24px;
+  }
+
+  .openings-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--earth);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .openings-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #E0D4C8;
+  }
+
+  .opening-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 10px;
+  }
+
+  @media (max-width: 540px) {
+    .opening-row { grid-template-columns: 1fr 1fr; }
+    .opening-row .btn-remove { grid-column: 1 / -1; }
+  }
+
+  .btn-add,
+  .btn-remove {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all .2s;
+  }
+
+  .btn-add {
+    display: flex; align-items: center; gap: 6px;
+    padding: 10px 16px;
+    background: rgba(193,68,14,0.08);
+    color: var(--brick);
+    border: 1.5px dashed var(--brick-light);
+    margin-top: 4px;
+  }
+
+  .btn-add:hover { background: rgba(193,68,14,0.14); }
+
+  .btn-remove {
+    width: 36px; height: 50px;
+    background: #FFF0EB;
+    color: var(--brick);
+    font-size: 18px;
+    line-height: 1;
+    flex-shrink: 0;
+    border-radius: 10px;
+  }
+
+  .btn-remove:hover { background: #FFE0D5; }
+
+  /* ── CALCULAR ── */
+  .btn-calc {
+    width: 100%;
+    margin-top: 28px;
+    height: 58px;
+    background: linear-gradient(135deg, var(--brick-light) 0%, var(--brick-dark) 100%);
+    color: var(--white);
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .2s;
+    box-shadow: 0 6px 20px rgba(193,68,14,0.35);
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+
+  .btn-calc:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(193,68,14,0.4); }
+  .btn-calc:active { transform: translateY(0); }
+
+  /* ── RESULTADO ── */
+  .result-box {
+    margin-top: 28px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 2px solid var(--brick-light);
+    display: none;
+    animation: fadeUp .4s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-box.visible { display: block; }
+
+  .result-header {
+    background: linear-gradient(135deg, var(--brick) 0%, var(--brick-dark) 100%);
+    padding: 16px 24px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.8);
+  }
+
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--white);
+  }
+
+  @media (max-width: 460px) {
+    .result-grid { grid-template-columns: 1fr; }
+  }
+
+  .result-item {
+    padding: 22px 24px;
+    border-right: 1px solid #EDE5DC;
+    border-bottom: 1px solid #EDE5DC;
+  }
+
+  .result-item:nth-child(even) { border-right: none; }
+
+  .result-item .label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    margin-bottom: 6px;
+  }
+
+  .result-item .value {
+    font-family: 'Oswald', sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--brick);
+    line-height: 1;
+  }
+
+  .result-item .unit {
+    font-size: 13px;
+    color: var(--earth);
+    margin-top: 4px;
+  }
+
+  .result-item.highlight {
+    background: linear-gradient(135deg, #FFF4EF 0%, #FFEDE4 100%);
+    grid-column: 1 / -1;
+    border-right: none;
+  }
+
+  .result-item.highlight .value {
+    font-size: 40px;
+  }
+
+  .result-tip {
+    padding: 16px 24px;
+    background: #FFF8F5;
+    font-size: 13px;
+    color: var(--text-soft);
+    line-height: 1.6;
+    border-top: 1px solid #EDE5DC;
+  }
+
+  .result-tip strong { color: var(--brick); }
+
+  /* ── INFO FOOTER ── */
+  .info-footer {
+    margin-top: 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .info-card {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 20px;
+    border-left: 4px solid var(--brick-light);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  }
+
+  .info-card h4 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--brick-dark);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+
+  .info-card p {
+    font-size: 13px;
+    color: var(--text-soft);
+    line-height: 1.55;
+  }
+
+  /* ── ERROR ── */
+  .error-msg {
+    margin-top: 12px;
+    padding: 12px 16px;
+    background: #FFF2F0;
+    border: 1.5px solid #FFCDC5;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #B5280A;
+    display: none;
+  }
+
+  .error-msg.visible { display: block; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-eyebrow">Ferramenta gratuita</div>
+  <h1>Calculadora<br>de <span>Tijolos</span></h1>
+  <p>Informe as medidas da sua obra e descubra exatamente quantos tijolos você precisa comprar.</p>
+</div>
+
+<div class="calc-wrapper">
+  <div class="card">
+
+    <div class="card-header">
+      <div class="card-header-icon">🧱</div>
+      <div>
+        <h2>Dados da Parede</h2>
+        <p>Preencha os campos abaixo para calcular</p>
+      </div>
+    </div>
+
+    <div class="card-body">
+
+      <div class="fields-grid">
+
+        <div class="field field-full">
+          <label>Tipo de Tijolo</label>
+          <select id="tipoTijolo" onchange="atualizarDimensoes()">
+            <option value="8f_19x19x9">Tijolo 8 furos — 19×19×9 cm</option>
+            <option value="6f_19x14x9">Tijolo 6 furos — 19×14×9 cm</option>
+            <option value="comum_20x10x5">Tijolo Maciço Comum — 20×10×5 cm</option>
+            <option value="aparente_21x10x6">Tijolo Aparente — 21×10×6 cm</option>
+            <option value="ceramico_30x15x11">Tijolo Cerâmico — 30×15×11 cm</option>
+            <option value="personalizado">Dimensões personalizadas</option>
+          </select>
+        </div>
+
+        <div class="field" id="fieldComp" style="display:none">
+          <label>Comprimento (cm)</label>
+          <input type="number" id="tijoloComp" value="19" min="1" step="0.5" placeholder="cm">
+        </div>
+        <div class="field" id="fieldAltura" style="display:none">
+          <label>Altura do tijolo (cm)</label>
+          <input type="number" id="tijoloAltura" value="19" min="1" step="0.5" placeholder="cm">
+        </div>
+
+        <div class="field field-full">
+          <label>Espessura da Parede</label>
+          <select id="espessura">
+            <option value="meia">Tijolo em pé (1 tijolo de espessura)</option>
+            <option value="uma">Tijolo deitado / duplo (2 tijolos de espessura)</option>
+          </select>
+        </div>
+
+        <div class="field field-full">
+          <label>Espessura da Junta de Argamassa (cm)</label>
+          <select id="junta">
+            <option value="1">1 cm (padrão)</option>
+            <option value="1.2">1,2 cm</option>
+            <option value="1.5">1,5 cm</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Largura da Parede (m)</label>
+          <input type="number" id="largura" value="" min="0.1" step="0.1" placeholder="ex: 5.00">
+        </div>
+        <div class="field">
+          <label>Altura da Parede (m)</label>
+          <input type="number" id="altura" value="" min="0.1" step="0.1" placeholder="ex: 3.00">
+        </div>
+
+        <div class="field field-full">
+          <label>Margem de Perda / Quebra</label>
+          <select id="perda">
+            <option value="5">5% — Obra simples, pouco corte</option>
+            <option value="10" selected>10% — Padrão recomendado</option>
+            <option value="15">15% — Muitos recortes ou vãos</option>
+            <option value="20">20% — Obra complexa</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="openings-section">
+        <div class="openings-title">Descontar Aberturas</div>
+        <div id="aberturasContainer"></div>
+        <button class="btn-add" onclick="adicionarAbertura()">
+          <span>＋</span> Adicionar porta / janela
+        </button>
+      </div>
+
+      <button class="btn-calc" onclick="calcular()">
+        🧮 Calcular quantidade
+      </button>
+
+      <div class="error-msg" id="errorMsg">Por favor, preencha a largura e a altura da parede antes de calcular.</div>
+
+      <div class="result-box" id="resultBox">
+        <div class="result-header">📦 Resultado do Cálculo</div>
+        <div class="result-grid">
+          <div class="result-item">
+            <div class="label">Área total da parede</div>
+            <div class="value" id="resAreaTotal">—</div>
+            <div class="unit">m²</div>
+          </div>
+          <div class="result-item">
+            <div class="label">Área das aberturas</div>
+            <div class="value" id="resAreaAberturas">—</div>
+            <div class="unit">m²</div>
+          </div>
+          <div class="result-item">
+            <div class="label">Área líquida de alvenaria</div>
+            <div class="value" id="resAreaLiquida">—</div>
+            <div class="unit">m²</div>
+          </div>
+          <div class="result-item">
+            <div class="label">Tijolos por m² (sem perda)</div>
+            <div class="value" id="resTijolosM2">—</div>
+            <div class="unit">unidades/m²</div>
+          </div>
+          <div class="result-item highlight">
+            <div class="label">Total de tijolos necessários (com margem de perda)</div>
+            <div class="value" id="resTotal">—</div>
+            <div class="unit">unidades</div>
+          </div>
+        </div>
+        <div class="result-tip" id="resTip"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- <div class="info-footer">
+    <div class="info-card">
+      <h4>📐 Meia vez ou uma vez?</h4>
+      <p><strong>Meia vez</strong> é quando o tijolo fica de assentado em pé e a parede tem a largura do tijolo. <strong>Uma vez</strong> usa o tijolo deitado (ou duas fileiras) — ideal para paredes robustas e isolantes.</p>
+    </div>
+    <div class="info-card">
+      <h4>⚠️ Por que incluir perda?</h4>
+      <p>Cortes, quebras no transporte e ajustes de canto sempre geram desperdício. O padrão de <strong>10%</strong> é recomendado pela maioria dos engenheiros.</p>
+    </div>
+    <div class="info-card">
+      <h4>💡 Dica de compra</h4>
+      <p>Compre um pouco acima do calculado para repor peças quebradas no assentamento e ter sobras para eventuais reparos futuros.</p>
+    </div>
+  </div> -->
+
+</div>
+
+<script>
+  // Dimensões padrão corrigidas do mercado brasileiro (Comprimento e Altura em pé)
+  const TIJOLOS = {
+    '8f_19x19x9':        { comp: 19,   alt: 19 },
+    '6f_19x14x9':        { comp: 19,   alt: 14 },
+    'comum_20x10x5':     { comp: 20,   alt: 5  },
+    'aparente_21x10x6':  { comp: 21,   alt: 6  },
+    'ceramico_30x15x11': { comp: 30,   alt: 15 },
+    'personalizado': null
+  };
+
+  function atualizarDimensoes() {
+    const tipo = document.getElementById('tipoTijolo').value;
+    const show = tipo === 'personalizado';
+    document.getElementById('fieldComp').style.display   = show ? '' : 'none';
+    document.getElementById('fieldAltura').style.display = show ? '' : 'none';
+    if (!show && TIJOLOS[tipo]) {
+      document.getElementById('tijoloComp').value   = TIJOLOS[tipo].comp;
+      document.getElementById('tijoloAltura').value = TIJOLOS[tipo].alt;
+    }
+  }
+
+  let aberturaCount = 0;
+
+  function adicionarAbertura() {
+    aberturaCount++;
+    const id = aberturaCount;
+    const container = document.getElementById('aberturasContainer');
+    const row = document.createElement('div');
+    row.className = 'opening-row';
+    row.id = 'abertura_' + id;
+    row.innerHTML = `
+      <div class="field">
+        <label>Largura (m)</label>
+        <input type="number" min="0.1" step="0.1" placeholder="ex: 1.00">
+      </div>
+      <div class="field">
+        <label>Altura (m)</label>
+        <input type="number" min="0.1" step="0.1" placeholder="ex: 2.20">
+      </div>
+      <button class="btn-remove" onclick="removerAbertura(${id})" title="Remover">✕</button>
+    `;
+    container.appendChild(row);
+  }
+
+  function removerAbertura(id) {
+    const el = document.getElementById('abertura_' + id);
+    if (el) el.remove();
+  }
+
+  function calcular() {
+    const errorEl  = document.getElementById('errorMsg');
+    const resultEl = document.getElementById('resultBox');
+
+    const largura = parseFloat(document.getElementById('largura').value);
+    const altura  = parseFloat(document.getElementById('altura').value);
+
+    if (!largura || !altura || largura <= 0 || altura <= 0) {
+      errorEl.classList.add('visible');
+      resultEl.classList.remove('visible');
+      return;
+    }
+    errorEl.classList.remove('visible');
+
+    // Dimensões base do tijolo
+    const tipo = document.getElementById('tipoTijolo').value;
+    let compTijolo, altTijolo;
+    if (tipo === 'personalizado') {
+      compTijolo = parseFloat(document.getElementById('tijoloComp').value) || 19;
+      altTijolo  = parseFloat(document.getElementById('tijoloAltura').value) || 19;
+    } else {
+      compTijolo = TIJOLOS[tipo].comp;
+      altTijolo  = TIJOLOS[tipo].alt;
+    }
+
+    const junta = parseFloat(document.getElementById('junta').value);
+    const espessura = document.getElementById('espessura').value;
+    const perda = parseFloat(document.getElementById('perda').value) / 100;
+
+    // Ajuste da face de assentamento se a parede for de "Uma vez" (tijolo deitado)
+    let fator = 1;
+    if (espessura === 'uma') {
+      if (tipo === '8f_19x19x9') {
+        altTijolo = 9; // O tijolo de 8 furos deitado passa a expor a face de 19x9cm
+        fator = 2;     // Exige duas fileiras para dar a espessura de uma vez
+      } else if (tipo === '6f_19x14x9') {
+        altTijolo = 9; // O tijolo de 6 furos deitado expõe a face de 19x9cm
+        fator = 2;
+      } else {
+        fator = 2;     // Para maciços ou blocos estruturais que espelham perfeitamente
+      }
+    }
+
+    // Cálculo exato de tijolos por m² incluindo a junta de argamassa
+    const compM  = (compTijolo + junta) / 100;
+    const altM   = (altTijolo  + junta) / 100;
+    const tijolosM2 = fator * (1 / (compM * altM));
+
+    // Área total da parede
+    const areaTotal = largura * altura;
+
+    // Cálculo dinâmico das aberturas (evita falhas com IDs deletados)
+    let areaAberturas = 0;
+    const linhasAberturas = document.querySelectorAll('.opening-row');
+    linhasAberturas.forEach(linha => {
+      const inputs = linha.querySelectorAll('input[type="number"]');
+      if (inputs.length >= 2) {
+        const l = parseFloat(inputs[0].value) || 0;
+        const a = parseFloat(inputs[1].value) || 0;
+        areaAberturas += l * a;
+      }
+    });
+
+    const areaLiquida = Math.max(0, areaTotal - areaAberturas);
+    const tijolosSemPerda = areaLiquida * tijolosM2;
+    const tijolosTotal = Math.ceil(tijolosSemPerda * (1 + perda));
+
+    // Preencher a interface com os resultados
+    document.getElementById('resAreaTotal').textContent     = areaTotal.toFixed(2);
+    document.getElementById('resAreaAberturas').textContent = areaAberturas.toFixed(2);
+    document.getElementById('resAreaLiquida').textContent   = areaLiquida.toFixed(2);
+    document.getElementById('resTijolosM2').textContent     = tijolosM2.toFixed(1);
+    document.getElementById('resTotal').textContent         = tijolosTotal.toLocaleString('pt-BR');
+
+    const centenas = Math.ceil(tijolosTotal / 100);
+    document.getElementById('resTip').innerHTML =
+      `💡 <strong>Sugestão:</strong> Compre pelo menos <strong>${tijolosTotal.toLocaleString('pt-BR')} tijolos</strong> (${centenas} centenas). Já incluso ${Math.round(perda*100)}% de margem de perda. Qualquer dúvida, <strong>entre em contato com nossa equipe</strong> para uma cotação personalizada.`;
+
+    resultEl.classList.add('visible');
+    resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+</script>
+</body>
+</html>
